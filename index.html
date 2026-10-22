@@ -3,128 +3,376 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ex 9 – MongoDB Shell | Science Fair</title>
+<title>Science Fair 2026</title>
 <style>
-  :root { --bg:#0f172a; --card:#1e293b; --txt:#e2e8f0; --mut:#94a3b8; --acc:#22c55e; --code:#020617; }
+  :root { --bg:#f1f5f9; --card:#fff; --txt:#0f172a; --mut:#64748b; --acc:#16a34a; --acc2:#0ea5e9; --code:#0f172a; --line:#e2e8f0; }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--txt); line-height:1.6; }
-  header { padding:40px 16px; text-align:center; background:linear-gradient(135deg,#14532d,#0f172a); }
-  header h1 { margin:0 0 8px; font-size:clamp(1.5rem,4vw,2.3rem); }
-  header p { margin:0; color:var(--mut); }
-  nav { position:sticky; top:0; background:#0b1222; padding:10px 16px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:1; }
-  nav a { color:var(--acc); text-decoration:none; font-size:.9rem; }
-  main { max-width:960px; margin:auto; padding:16px; }
-  section { background:var(--card); border-radius:12px; padding:20px; margin:20px 0; }
-  h2 { color:var(--acc); margin-top:0; }
-  pre { background:var(--code); padding:14px; border-radius:8px; overflow-x:auto; font-size:.85rem; }
+  body { margin:0; font-family:system-ui,Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--txt); }
+  header { background:linear-gradient(135deg,#14532d,#0369a1); color:#fff; padding:28px 16px; text-align:center; }
+  header h1 { margin:0; font-size:clamp(1.6rem,4vw,2.4rem); }
+  header p { margin:6px 0 0; opacity:.85; }
+  nav { background:#0f172a; display:flex; flex-wrap:wrap; justify-content:center; }
+  nav button { background:none; border:0; color:#cbd5e1; padding:12px 16px; cursor:pointer; font-size:.95rem; }
+  nav button.on { color:#fff; border-bottom:3px solid var(--acc); }
+  main { max-width:1100px; margin:auto; padding:16px; }
+  .page { display:none; } .page.on { display:block; }
+  .card { background:var(--card); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 1px 3px #0001; }
+  h2 { margin-top:0; color:#14532d; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--card); border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 3px #0001; }
+  .stat b { display:block; font-size:2rem; color:var(--acc); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .proj { background:var(--card); border-radius:12px; padding:16px; box-shadow:0 1px 3px #0001; border-top:4px solid var(--acc2); }
+  .proj h3 { margin:0 0 6px; font-size:1.05rem; }
+  .tag { display:inline-block; font-size:.75rem; padding:2px 8px; border-radius:20px; background:#e0f2fe; color:#0369a1; }
+  .score { float:right; font-weight:700; color:var(--acc); font-size:1.3rem; }
+  .proj small { color:var(--mut); display:block; margin-top:6px; }
+  .proj .act { margin-top:10px; display:flex; gap:6px; }
+  form, .row { display:flex; flex-wrap:wrap; gap:10px; align-items:end; }
+  label { display:flex; flex-direction:column; font-size:.8rem; color:var(--mut); gap:4px; }
+  input, select { padding:8px; border:1px solid var(--line); border-radius:6px; font-size:.95rem; min-width:120px; }
+  .btn { padding:9px 14px; border:0; border-radius:6px; background:var(--acc); color:#fff; cursor:pointer; font-weight:600; }
+  .btn.sm { padding:5px 10px; font-size:.8rem; }
+  .btn.blue { background:var(--acc2); } .btn.red { background:#dc2626; } .btn.gray { background:#64748b; }
+  .podium { display:flex; justify-content:center; align-items:end; gap:12px; margin-top:20px; flex-wrap:wrap; }
+  .pod { text-align:center; background:var(--card); border-radius:12px 12px 0 0; padding:14px; width:180px; box-shadow:0 1px 3px #0001; }
+  .pod .m { font-size:2.2rem; }
   table { width:100%; border-collapse:collapse; font-size:.9rem; }
-  th,td { padding:8px; border-bottom:1px solid #334155; text-align:left; }
-  th { color:var(--acc); }
+  th, td { padding:8px; border-bottom:1px solid var(--line); text-align:left; }
   .wrap { overflow-x:auto; }
-  footer { text-align:center; color:var(--mut); padding:24px; font-size:.85rem; }
-  .btn { display:inline-block; margin-top:10px; padding:8px 14px; background:var(--acc); color:#052e16; border-radius:6px; text-decoration:none; font-weight:600; }
+  #shell { position:sticky; bottom:0; background:var(--code); color:#86efac; font-family:Consolas,monospace; font-size:.82rem; padding:10px 16px; max-height:140px; overflow-y:auto; }
+  #shell div::before { content:"ScienceFairDB> "; color:#38bdf8; }
+  footer { text-align:center; color:var(--mut); font-size:.8rem; padding:16px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>🔬 Ex. No. 9 – Working with MongoDB using Shell Commands</h1>
-  <p>Science Fair Project Site · ScienceFairDB · URK24CS1059</p>
+  <h1>🔬 Young Innovators Science Fair 2026</h1>
+  <p>Explore, judge and celebrate student science projects</p>
 </header>
-<nav>
-  <a href="#aim">Aim</a><a href="#steps">Procedure</a><a href="#output">Output</a><a href="#questions">Sample Questions</a><a href="#result">Result</a>
+<nav id="nav">
+  <button data-p="home" class="on">Home</button>
+  <button data-p="projects">Projects</button>
+  <button data-p="register">Register</button>
+  <button data-p="leader">Leaderboard</button>
+  <button data-p="judges">Judges</button>
+  <button data-p="kits">Lab Kits</button>
+  <button data-p="library">Library</button>
 </nav>
+
 <main>
-  <section id="aim">
-    <h2>Aim</h2>
-    <p>To create a database and collections, insert, retrieve, update and delete documents, and query, sort and count data using MongoDB Shell (<code>mongosh</code>) commands, applied to a Science Fair project site.</p>
+  <!-- HOME -->
+  <section class="page on" id="home">
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b>Projects</div>
+      <div class="stat"><b id="sPhy">0</b>Physics</div>
+      <div class="stat"><b id="sTop">0</b>Highest Score</div>
+      <div class="stat"><b id="sJ">0</b>Judges</div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Welcome!</h2>
+      <p>Students from grades 9–12 present their projects in Physics, Chemistry, Biology and Environment. Browse projects, register yours, and follow the live leaderboard.</p>
+      <div class="row">
+        <button class="btn gray" onclick="resetData()">Reset sample data</button>
+      </div>
+    </div>
   </section>
 
-  <section id="steps">
-    <h2>Procedure</h2>
-    <pre>// Step 1-3: start shell, create database and collection
-mongosh
-use ScienceFairDB
-db.createCollection("projects")
-show collections
-
-// Step 4: insert
-db.projects.insertOne({ projectId: 101, title: "Solar Water Heater", student: "Arun",
-                        category: "Physics", grade: 10, score: 85 })
-db.projects.insertMany([ /* 102 – 105 */ ])
-
-// Step 5-6: retrieve with conditions
-db.projects.find().pretty()
-db.projects.find({ score: { $gt: 80 } })
-db.projects.find({ grade: { $gte: 10, $lte: 11 } })
-db.projects.find({ category: { $in: ["Physics", "Chemistry"] } })
-
-// Step 7: update
-db.projects.updateOne({ projectId: 101 }, { $set: { score: 90 } })
-db.projects.updateMany({ category: "Physics" }, { $inc: { score: 5 } })
-
-// Step 8: delete
-db.projects.deleteOne({ projectId: 105 })
-db.projects.deleteMany({ score: { $lt: 70 } })
-
-// Step 9-11: sort, limit, count, info
-db.projects.find().sort({ score: -1 }).limit(3)
-db.projects.countDocuments({ category: "Physics" })
-show dbs
-db.stats()</pre>
-    <a class="btn" href="Ex9_ScienceFair_MongoDB.js" target="_blank">View full script (.js)</a>
+  <!-- PROJECTS -->
+  <section class="page" id="projects">
+    <div class="card">
+      <h2>Find Projects</h2>
+      <div class="row">
+        <label>Student<input id="fStudent" placeholder="e.g. Priya"></label>
+        <label>Category<select id="fCat"><option value="">All</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Environment</option></select></label>
+        <label>Min score<input id="fMin" type="number" placeholder="e.g. 80"></label>
+        <label>Grade from<input id="fG1" type="number" min="9" max="12"></label>
+        <label>Grade to<input id="fG2" type="number" min="9" max="12"></label>
+        <label>Sort<select id="fSort"><option value="">None</option><option value="-1">Score high→low</option><option value="1">Score low→high</option></select></label>
+        <button class="btn" onclick="renderProjects(true)">Search</button>
+      </div>
+    </div>
+    <p id="pCount"></p>
+    <div class="grid" id="pGrid"></div>
   </section>
 
-  <section id="output">
-    <h2>Final <code>projects</code> collection (after running the script)</h2>
-    <div class="wrap"><table>
-      <tr><th>ID</th><th>Title</th><th>Student</th><th>Category</th><th>Grade</th><th>Score</th><th>Reviewed</th></tr>
-      <tr><td>101</td><td>Solar Water Heater</td><td>Arun</td><td>Physics</td><td>10</td><td>95</td><td>✔</td></tr>
-      <tr><td>102</td><td>Plant Growth under Coloured Light</td><td>Priya</td><td>Biology</td><td>11</td><td>92</td><td></td></tr>
-      <tr><td>103</td><td>Magnetic Levitation Train</td><td>Kumar</td><td>Physics</td><td>9</td><td>83</td><td></td></tr>
-      <tr><td>104</td><td>Natural Dye pH Indicator</td><td>Divya</td><td>Chemistry</td><td>10</td><td>88</td><td>✔</td></tr>
-    </table></div>
-    <p>Arun: 85 → 90 (<code>$set</code>) → 95 (<code>$inc</code> Physics +5). Kumar: 78 → 83. Project 105 deleted.</p>
+  <!-- REGISTER -->
+  <section class="page" id="register">
+    <div class="card">
+      <h2>Register a Project</h2>
+      <form id="regForm">
+        <label>Title<input name="title" required></label>
+        <label>Student<input name="student" required></label>
+        <label>Category<select name="category"><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Environment</option></select></label>
+        <label>Grade<input name="grade" type="number" min="9" max="12" required></label>
+        <label>Score<input name="score" type="number" min="0" max="100" value="0"></label>
+        <button class="btn">Register</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Judging Tools</h2>
+      <div class="row">
+        <label>Category<select id="bCat"><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Environment</option></select></label>
+        <label>Bonus<input id="bPts" type="number" value="5"></label>
+        <button class="btn blue" onclick="bonus()">Add bonus to category</button>
+        <label>Remove below<input id="dMin" type="number" value="70"></label>
+        <button class="btn red" onclick="removeLow()">Remove low scorers</button>
+      </div>
+    </div>
   </section>
 
-  <section id="questions">
-    <h2>Sample Questions</h2>
-    <h3>Q1. Project Management</h3>
-    <pre>db.projects.find()
-db.projects.findOne({ projectId: 102 })
-db.projects.find({ score: { $gt: 80 } })
-db.projects.updateOne({ projectId: 103 }, { $set: { score: 82 } })
-db.projects.deleteOne({ projectId: 103 })</pre>
-    <h3>Q2. Judges (JudgesDB)</h3>
-    <pre>db.judges.find()
-db.judges.find({ honorarium: { $gt: 4000 } })
-db.judges.updateOne({ judgeId: 4 }, { $set: { honorarium: 4000 } })
-db.judges.find().sort({ honorarium: -1 })
-db.judges.countDocuments({ field: "Physics" })</pre>
-    <h3>Q3. Lab Kits (KitDB)</h3>
-    <pre>db.kits.find({ category: "Physics" })
-db.kits.find({ price: { $gte: 500, $lte: 2000 } })
-db.kits.updateOne({ kitId: 2 }, { $inc: { stock: 10 } })
-db.kits.deleteMany({ stock: 0 })
-db.kits.find().sort({ price: -1 }).limit(5)</pre>
-    <h3>Q4. Reference Library (LibraryDB)</h3>
-    <pre>db.books.find({ author: "S. Iyer" })
-db.books.find({ category: "Physics" })
-db.books.updateOne({ bookId: 3 }, { $set: { price: 550 } })
-db.books.find().sort({ title: 1 })
-db.books.countDocuments()</pre>
-    <h3>Q5. Query Operations</h3>
-    <pre>db.projects.find({ score: { $gte: 75 } })
-db.projects.find({ grade: { $lt: 11 } })
-db.projects.find({ category: { $in: ["Physics", "Biology"] } })
-db.projects.find().sort({ score: -1 }).limit(3)
-db.projects.updateMany({ grade: 10 }, { $set: { reviewed: true } })</pre>
+  <!-- LEADERBOARD -->
+  <section class="page" id="leader">
+    <div class="card"><h2>🏆 Top 3 Projects</h2><div class="podium" id="podium"></div></div>
+    <div class="card"><h2>Full Rankings</h2><div class="wrap"><table id="rank"></table></div></div>
   </section>
 
-  <section id="result">
-    <h2>Result</h2>
-    <p>The MongoDB database and collections were created successfully; documents were inserted, retrieved, filtered with query operators, updated, deleted, sorted, limited and counted using MongoDB Shell commands.</p>
+  <!-- JUDGES -->
+  <section class="page" id="judges">
+    <div class="card">
+      <h2>Our Judges</h2>
+      <div class="row">
+        <label>Honorarium above<input id="jMin" type="number" placeholder="4000"></label>
+        <button class="btn" onclick="renderJudges(true)">Filter</button>
+        <label>Count in field<select id="jField"><option>Physics</option><option>Biology</option><option>Chemistry</option><option>Environment</option></select></label>
+        <button class="btn blue" onclick="countJudges()">Count</button>
+        <span id="jCount"></span>
+      </div>
+    </div>
+    <div class="card wrap"><table id="jTable"></table></div>
+  </section>
+
+  <!-- KITS -->
+  <section class="page" id="kits">
+    <div class="card">
+      <h2>Lab Kit Store</h2>
+      <div class="row">
+        <label>Category<select id="kCat"><option value="">All</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Environment</option></select></label>
+        <label>Price from<input id="kP1" type="number" placeholder="500"></label>
+        <label>Price to<input id="kP2" type="number" placeholder="2000"></label>
+        <button class="btn" onclick="renderKits(true)">Search</button>
+        <button class="btn blue" onclick="topKits()">5 most expensive</button>
+        <button class="btn red" onclick="removeOOS()">Remove out-of-stock</button>
+      </div>
+    </div>
+    <div class="card wrap"><table id="kTable"></table></div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="page" id="library">
+    <div class="card">
+      <h2>Reference Library</h2>
+      <div class="row">
+        <label>Author<input id="lAuth" placeholder="S. Iyer"></label>
+        <label>Category<select id="lCat"><option value="">All</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Environment</option><option>General</option></select></label>
+        <label>Sort<select id="lSort"><option value="">None</option><option value="1">Title A→Z</option></select></label>
+        <button class="btn" onclick="renderBooks(true)">Search</button>
+        <span id="lCount"></span>
+      </div>
+    </div>
+    <div class="card wrap"><table id="lTable"></table></div>
   </section>
 </main>
-<footer>Web Technology Lab · Experiment 9 · URK24CS1059</footer>
+
+<div id="shell"></div>
+<footer>Science Fair site powered by MongoDB-style queries · URK24CS1059</footer>
+
+<script>
+// ---- Seed data (mirrors Ex9_ScienceFair_MongoDB.js) ----
+const SEED = {
+  projects: [
+    { projectId:101, title:"Solar Water Heater", student:"Arun", category:"Physics", grade:10, score:85 },
+    { projectId:102, title:"Plant Growth under Coloured Light", student:"Priya", category:"Biology", grade:11, score:92 },
+    { projectId:103, title:"Magnetic Levitation Train", student:"Kumar", category:"Physics", grade:9, score:78 },
+    { projectId:104, title:"Natural Dye pH Indicator", student:"Divya", category:"Chemistry", grade:10, score:88 },
+    { projectId:105, title:"Pendulum Wave Demonstration", student:"Ravi", category:"Physics", grade:12, score:67 }
+  ],
+  judges: [
+    { judgeId:1, name:"Dr. Meena", field:"Physics", honorarium:5000, experience:12 },
+    { judgeId:2, name:"Prof. Suresh", field:"Biology", honorarium:4500, experience:9 },
+    { judgeId:3, name:"Dr. Lakshmi", field:"Chemistry", honorarium:6000, experience:15 },
+    { judgeId:4, name:"Mr. Karthik", field:"Environment", honorarium:3500, experience:5 },
+    { judgeId:5, name:"Dr. Anand", field:"Physics", honorarium:5500, experience:11 }
+  ],
+  kits: [
+    { kitId:1, name:"Microscope Set", category:"Biology", price:1800, stock:12 },
+    { kitId:2, name:"Circuit Kit", category:"Physics", price:650, stock:30 },
+    { kitId:3, name:"Chemical Test Kit", category:"Chemistry", price:950, stock:0 },
+    { kitId:4, name:"Telescope", category:"Physics", price:3500, stock:5 },
+    { kitId:5, name:"Soil Testing Kit", category:"Environment", price:500, stock:20 }
+  ],
+  books: [
+    { bookId:1, title:"Physics for Young Scientists", author:"R. Sharma", category:"Physics", price:450 },
+    { bookId:2, title:"Easy Chemistry Experiments", author:"S. Iyer", category:"Chemistry", price:380 },
+    { bookId:3, title:"The Living World", author:"M. Nair", category:"Biology", price:520 },
+    { bookId:4, title:"Green Earth Projects", author:"P. Rao", category:"Environment", price:300 },
+    { bookId:5, title:"Science Fair Handbook", author:"K. Das", category:"General", price:600 }
+  ]
+};
+
+let db;
+function load() {
+  try { db = JSON.parse(localStorage.getItem("sfdb")); } catch (e) { db = null; }
+  if (!db) db = JSON.parse(JSON.stringify(SEED));
+}
+function save() { try { localStorage.setItem("sfdb", JSON.stringify(db)); } catch (e) {} }
+function resetData() { db = JSON.parse(JSON.stringify(SEED)); save(); log('db.dropDatabase()  // reloaded sample data'); renderAll(); }
+
+// ---- Mini MongoDB query engine ($gt $gte $lt $lte $in, equality) ----
+function match(doc, q) {
+  return Object.entries(q).every(([k, c]) => {
+    const v = doc[k];
+    if (c && typeof c === "object" && !Array.isArray(c)) {
+      return Object.entries(c).every(([op, x]) =>
+        op === "$gt" ? v > x : op === "$gte" ? v >= x : op === "$lt" ? v < x :
+        op === "$lte" ? v <= x : op === "$in" ? x.includes(v) : false);
+    }
+    return v === c;
+  });
+}
+function find(coll, q = {}, sort, limit) {
+  let r = db[coll].filter(d => match(d, q));
+  if (sort) { const [k, dir] = Object.entries(sort)[0]; r.sort((a, b) => (a[k] > b[k] ? 1 : a[k] < b[k] ? -1 : 0) * dir); }
+  return limit ? r.slice(0, limit) : r;
+}
+function updateMany(coll, q, upd) {
+  const r = find(coll, q);
+  r.forEach(d => {
+    if (upd.$set) Object.assign(d, upd.$set);
+    if (upd.$inc) for (const k in upd.$inc) d[k] += upd.$inc[k];
+  });
+  save(); return r.length;
+}
+function deleteMany(coll, q) { const n = db[coll].length; db[coll] = db[coll].filter(d => !match(d, q)); save(); return n - db[coll].length; }
+
+const shell = document.getElementById("shell");
+function log(cmd) { const d = document.createElement("div"); d.textContent = cmd; shell.appendChild(d); shell.scrollTop = shell.scrollHeight; }
+const js = o => JSON.stringify(o).replace(/"(\w+)":/g, "$1: ").replace(/,/g, ", ");
+const cmd = (coll, q, sort, limit) => `db.${coll}.find(${js(q)})` + (sort ? `.sort(${js(sort)})` : "") + (limit ? `.limit(${limit})` : "");
+const num = id => { const v = document.getElementById(id).value; return v === "" ? null : +v; };
+
+// ---- Projects ----
+function renderProjects(doLog) {
+  const q = {}, s = fStudent.value.trim(), c = fCat.value, m = num("fMin"), g1 = num("fG1"), g2 = num("fG2");
+  if (s) q.student = s;
+  if (c) q.category = c;
+  if (m !== null) q.score = { $gte: m };
+  if (g1 !== null || g2 !== null) { q.grade = {}; if (g1 !== null) q.grade.$gte = g1; if (g2 !== null) q.grade.$lte = g2; }
+  const sort = fSort.value ? { score: +fSort.value } : null;
+  const r = find("projects", q, sort);
+  if (doLog) log(cmd("projects", q, sort));
+  pCount.textContent = `${r.length} project(s) found`;
+  pGrid.innerHTML = r.map(p => `<div class="proj"><span class="score">${p.score}</span>
+    <h3>${p.title}</h3><span class="tag">${p.category}</span>
+    <small>👤 ${p.student} · Grade ${p.grade} · ID ${p.projectId}</small>
+    <div class="act"><button class="btn sm blue" onclick="editScore(${p.projectId})">Update score</button>
+    <button class="btn sm red" onclick="delProject(${p.projectId})">Delete</button></div></div>`).join("");
+}
+function editScore(id) {
+  const p = find("projects", { projectId: id })[0];
+  const v = prompt(`New score for "${p.title}"`, p.score);
+  if (v === null || v === "" || isNaN(v)) return;
+  updateMany("projects", { projectId: id }, { $set: { score: +v } });
+  log(`db.projects.updateOne({ projectId: ${id} }, { $set: { score: ${+v} } })`); renderAll();
+}
+function delProject(id) {
+  deleteMany("projects", { projectId: id });
+  log(`db.projects.deleteOne({ projectId: ${id} })`); renderAll();
+}
+regForm.onsubmit = e => {
+  e.preventDefault();
+  const f = new FormData(regForm);
+  const doc = { projectId: Math.max(100, ...db.projects.map(p => p.projectId)) + 1, title: f.get("title"), student: f.get("student"),
+    category: f.get("category"), grade: +f.get("grade"), score: +f.get("score") };
+  db.projects.push(doc); save();
+  log(`db.projects.insertOne(${js(doc)})`);
+  regForm.reset(); alertMsg(`Registered project #${doc.projectId}`); renderAll();
+};
+function alertMsg(t) { log(`// ${t}`); }
+function bonus() {
+  const n = updateMany("projects", { category: bCat.value }, { $inc: { score: +bPts.value } });
+  log(`db.projects.updateMany({ category: "${bCat.value}" }, { $inc: { score: ${+bPts.value} } })  // modified ${n}`); renderAll();
+}
+function removeLow() {
+  const n = deleteMany("projects", { score: { $lt: +dMin.value } });
+  log(`db.projects.deleteMany({ score: { $lt: ${+dMin.value} } })  // deleted ${n}`); renderAll();
+}
+
+// ---- Leaderboard ----
+function renderLeader() {
+  const top = find("projects", {}, { score: -1 }, 3), medals = ["🥇", "🥈", "🥉"], h = [180, 220, 150];
+  const order = [1, 0, 2].filter(i => top[i]);
+  podium.innerHTML = order.map(i => `<div class="pod" style="height:${h[i === 0 ? 1 : i === 1 ? 0 : 2]}px">
+    <div class="m">${medals[i]}</div><b>${top[i].student}</b><br><small>${top[i].title}</small><br><b style="color:var(--acc)">${top[i].score}</b></div>`).join("");
+  rank.innerHTML = "<tr><th>#</th><th>Title</th><th>Student</th><th>Category</th><th>Grade</th><th>Score</th></tr>" +
+    find("projects", {}, { score: -1 }).map((p, i) => `<tr><td>${i + 1}</td><td>${p.title}</td><td>${p.student}</td><td>${p.category}</td><td>${p.grade}</td><td>${p.score}</td></tr>`).join("");
+}
+
+// ---- Judges ----
+function renderJudges(doLog, sort = { honorarium: -1 }) {
+  const m = num("jMin"), q = m !== null ? { honorarium: { $gt: m } } : {};
+  if (doLog) log(cmd("judges", q, sort));
+  jTable.innerHTML = "<tr><th>ID</th><th>Name</th><th>Field</th><th>Honorarium (₹)</th><th>Experience</th></tr>" +
+    find("judges", q, sort).map(j => `<tr><td>${j.judgeId}</td><td>${j.name}</td><td>${j.field}</td><td>${j.honorarium}</td><td>${j.experience} yrs</td></tr>`).join("");
+}
+function countJudges() {
+  const n = find("judges", { field: jField.value }).length;
+  jCount.textContent = `${n} judge(s) in ${jField.value}`;
+  log(`db.judges.countDocuments({ field: "${jField.value}" })  // ${n}`);
+}
+
+// ---- Kits ----
+function kitRows(r) {
+  kTable.innerHTML = "<tr><th>ID</th><th>Kit</th><th>Category</th><th>Price (₹)</th><th>Stock</th><th></th></tr>" +
+    r.map(k => `<tr><td>${k.kitId}</td><td>${k.name}</td><td>${k.category}</td><td>${k.price}</td><td>${k.stock}</td>
+    <td><button class="btn sm blue" onclick="restock(${k.kitId})">+10 stock</button></td></tr>`).join("");
+}
+function renderKits(doLog) {
+  const q = {}, p1 = num("kP1"), p2 = num("kP2");
+  if (kCat.value) q.category = kCat.value;
+  if (p1 !== null || p2 !== null) { q.price = {}; if (p1 !== null) q.price.$gte = p1; if (p2 !== null) q.price.$lte = p2; }
+  if (doLog) log(cmd("kits", q)); kitRows(find("kits", q));
+}
+function topKits() { log(cmd("kits", {}, { price: -1 }, 5)); kitRows(find("kits", {}, { price: -1 }, 5)); }
+function restock(id) { updateMany("kits", { kitId: id }, { $inc: { stock: 10 } }); log(`db.kits.updateOne({ kitId: ${id} }, { $inc: { stock: 10 } })`); renderKits(); }
+function removeOOS() { const n = deleteMany("kits", { stock: 0 }); log(`db.kits.deleteMany({ stock: 0 })  // deleted ${n}`); renderKits(); }
+
+// ---- Library ----
+function renderBooks(doLog) {
+  const q = {};
+  if (lAuth.value.trim()) q.author = lAuth.value.trim();
+  if (lCat.value) q.category = lCat.value;
+  const sort = lSort.value ? { title: 1 } : null;
+  if (doLog) log(cmd("books", q, sort));
+  lCount.textContent = `Total books: ${db.books.length}`;
+  lTable.innerHTML = "<tr><th>ID</th><th>Title</th><th>Author</th><th>Category</th><th>Price (₹)</th><th></th></tr>" +
+    find("books", q, sort).map(b => `<tr><td>${b.bookId}</td><td>${b.title}</td><td>${b.author}</td><td>${b.category}</td><td>${b.price}</td>
+    <td><button class="btn sm blue" onclick="bookPrice(${b.bookId})">Edit price</button></td></tr>`).join("");
+}
+function bookPrice(id) {
+  const v = prompt("New price (₹)");
+  if (v === null || v === "" || isNaN(v)) return;
+  updateMany("books", { bookId: id }, { $set: { price: +v } });
+  log(`db.books.updateOne({ bookId: ${id} }, { $set: { price: ${+v} } })`); renderBooks();
+}
+
+// ---- Home + nav ----
+function renderHome() {
+  sTotal.textContent = db.projects.length;
+  sPhy.textContent = find("projects", { category: "Physics" }).length;
+  sTop.textContent = db.projects.length ? find("projects", {}, { score: -1 }, 1)[0].score : 0;
+  sJ.textContent = db.judges.length;
+}
+function renderAll() { renderHome(); renderProjects(); renderLeader(); renderJudges(); renderKits(); renderBooks(); }
+nav.onclick = e => {
+  const p = e.target.dataset.p; if (!p) return;
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b === e.target));
+  document.querySelectorAll(".page").forEach(s => s.classList.toggle("on", s.id === p));
+};
+
+load(); renderAll();
+log('use ScienceFairDB');
+log(`db.projects.countDocuments()  // ${db.projects.length}`);
+</script>
 </body>
 </html>
