@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ex 9 – MongoDB Shell | Science Fair</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --txt:#e2e8f0; --mut:#94a3b8; --acc:#22c55e; --code:#020617; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--txt); line-height:1.6; }
+  header { padding:40px 16px; text-align:center; background:linear-gradient(135deg,#14532d,#0f172a); }
+  header h1 { margin:0 0 8px; font-size:clamp(1.5rem,4vw,2.3rem); }
+  header p { margin:0; color:var(--mut); }
+  nav { position:sticky; top:0; background:#0b1222; padding:10px 16px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center; z-index:1; }
+  nav a { color:var(--acc); text-decoration:none; font-size:.9rem; }
+  main { max-width:960px; margin:auto; padding:16px; }
+  section { background:var(--card); border-radius:12px; padding:20px; margin:20px 0; }
+  h2 { color:var(--acc); margin-top:0; }
+  pre { background:var(--code); padding:14px; border-radius:8px; overflow-x:auto; font-size:.85rem; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th,td { padding:8px; border-bottom:1px solid #334155; text-align:left; }
+  th { color:var(--acc); }
+  .wrap { overflow-x:auto; }
+  footer { text-align:center; color:var(--mut); padding:24px; font-size:.85rem; }
+  .btn { display:inline-block; margin-top:10px; padding:8px 14px; background:var(--acc); color:#052e16; border-radius:6px; text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🔬 Ex. No. 9 – Working with MongoDB using Shell Commands</h1>
+  <p>Science Fair Project Site · ScienceFairDB · URK24CS1059</p>
+</header>
+<nav>
+  <a href="#aim">Aim</a><a href="#steps">Procedure</a><a href="#output">Output</a><a href="#questions">Sample Questions</a><a href="#result">Result</a>
+</nav>
+<main>
+  <section id="aim">
+    <h2>Aim</h2>
+    <p>To create a database and collections, insert, retrieve, update and delete documents, and query, sort and count data using MongoDB Shell (<code>mongosh</code>) commands, applied to a Science Fair project site.</p>
+  </section>
+
+  <section id="steps">
+    <h2>Procedure</h2>
+    <pre>// Step 1-3: start shell, create database and collection
+mongosh
+use ScienceFairDB
+db.createCollection("projects")
+show collections
+
+// Step 4: insert
+db.projects.insertOne({ projectId: 101, title: "Solar Water Heater", student: "Arun",
+                        category: "Physics", grade: 10, score: 85 })
+db.projects.insertMany([ /* 102 – 105 */ ])
+
+// Step 5-6: retrieve with conditions
+db.projects.find().pretty()
+db.projects.find({ score: { $gt: 80 } })
+db.projects.find({ grade: { $gte: 10, $lte: 11 } })
+db.projects.find({ category: { $in: ["Physics", "Chemistry"] } })
+
+// Step 7: update
+db.projects.updateOne({ projectId: 101 }, { $set: { score: 90 } })
+db.projects.updateMany({ category: "Physics" }, { $inc: { score: 5 } })
+
+// Step 8: delete
+db.projects.deleteOne({ projectId: 105 })
+db.projects.deleteMany({ score: { $lt: 70 } })
+
+// Step 9-11: sort, limit, count, info
+db.projects.find().sort({ score: -1 }).limit(3)
+db.projects.countDocuments({ category: "Physics" })
+show dbs
+db.stats()</pre>
+    <a class="btn" href="Ex9_ScienceFair_MongoDB.js" target="_blank">View full script (.js)</a>
+  </section>
+
+  <section id="output">
+    <h2>Final <code>projects</code> collection (after running the script)</h2>
+    <div class="wrap"><table>
+      <tr><th>ID</th><th>Title</th><th>Student</th><th>Category</th><th>Grade</th><th>Score</th><th>Reviewed</th></tr>
+      <tr><td>101</td><td>Solar Water Heater</td><td>Arun</td><td>Physics</td><td>10</td><td>95</td><td>✔</td></tr>
+      <tr><td>102</td><td>Plant Growth under Coloured Light</td><td>Priya</td><td>Biology</td><td>11</td><td>92</td><td></td></tr>
+      <tr><td>103</td><td>Magnetic Levitation Train</td><td>Kumar</td><td>Physics</td><td>9</td><td>83</td><td></td></tr>
+      <tr><td>104</td><td>Natural Dye pH Indicator</td><td>Divya</td><td>Chemistry</td><td>10</td><td>88</td><td>✔</td></tr>
+    </table></div>
+    <p>Arun: 85 → 90 (<code>$set</code>) → 95 (<code>$inc</code> Physics +5). Kumar: 78 → 83. Project 105 deleted.</p>
+  </section>
+
+  <section id="questions">
+    <h2>Sample Questions</h2>
+    <h3>Q1. Project Management</h3>
+    <pre>db.projects.find()
+db.projects.findOne({ projectId: 102 })
+db.projects.find({ score: { $gt: 80 } })
+db.projects.updateOne({ projectId: 103 }, { $set: { score: 82 } })
+db.projects.deleteOne({ projectId: 103 })</pre>
+    <h3>Q2. Judges (JudgesDB)</h3>
+    <pre>db.judges.find()
+db.judges.find({ honorarium: { $gt: 4000 } })
+db.judges.updateOne({ judgeId: 4 }, { $set: { honorarium: 4000 } })
+db.judges.find().sort({ honorarium: -1 })
+db.judges.countDocuments({ field: "Physics" })</pre>
+    <h3>Q3. Lab Kits (KitDB)</h3>
+    <pre>db.kits.find({ category: "Physics" })
+db.kits.find({ price: { $gte: 500, $lte: 2000 } })
+db.kits.updateOne({ kitId: 2 }, { $inc: { stock: 10 } })
+db.kits.deleteMany({ stock: 0 })
+db.kits.find().sort({ price: -1 }).limit(5)</pre>
+    <h3>Q4. Reference Library (LibraryDB)</h3>
+    <pre>db.books.find({ author: "S. Iyer" })
+db.books.find({ category: "Physics" })
+db.books.updateOne({ bookId: 3 }, { $set: { price: 550 } })
+db.books.find().sort({ title: 1 })
+db.books.countDocuments()</pre>
+    <h3>Q5. Query Operations</h3>
+    <pre>db.projects.find({ score: { $gte: 75 } })
+db.projects.find({ grade: { $lt: 11 } })
+db.projects.find({ category: { $in: ["Physics", "Biology"] } })
+db.projects.find().sort({ score: -1 }).limit(3)
+db.projects.updateMany({ grade: 10 }, { $set: { reviewed: true } })</pre>
+  </section>
+
+  <section id="result">
+    <h2>Result</h2>
+    <p>The MongoDB database and collections were created successfully; documents were inserted, retrieved, filtered with query operators, updated, deleted, sorted, limited and counted using MongoDB Shell commands.</p>
+  </section>
+</main>
+<footer>Web Technology Lab · Experiment 9 · URK24CS1059</footer>
+</body>
+</html>
